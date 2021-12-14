@@ -1,11 +1,9 @@
-:- use_module(library(theme/dark)). % Permite utilizar modo oscuro
-
 % TDA Fecha
 % El TDA Fecha se representa a traves de una lista que almacena un dia
 % de tipo entero, un mes de tipo entero, y un anho de tipo entero.
 
 % Constructor
-fecha(Dia,Mes,Year, [Dia,Mes,Year]):-
+date(Dia,Mes,Year, [Dia,Mes,Year]):-
             number(Dia),number(Mes),number(Year),
             Mes > 0, (Mes < 12; Mes = 12).
 
@@ -16,9 +14,6 @@ getmes([_, Mes, _], Mes).
 
 getanho([_, _, Year], Year).
 
-% Pertenencia
-isfecha([Dia,Mes,Year]) :-
-    fecha(Dia,Mes,Year,_).
 
 
 
@@ -30,16 +25,18 @@ isfecha([Dia,Mes,Year]) :-
 % documentos creados.
 
 % Constructor
-paradigmadocs(Name, Date, [Name, Date, [], []]).
+paradigmadocs(Name, Date, [Name, Date, [], [], []]).
 
-%Selectores
-getplatformname([Name,_,_,_], Name).
+% Selectores
+getplatformname([Name,_,_,_,_], Name).
 
-getplatformdate([_,Date,_,_], Date).
+getplatformdate([_,Date,_,_,_], Date).
 
-getlistausers([_,_,Listausers,_], Listausers).
+getlistausers([_,_,Listausers,_,_], Listausers).
 
-getlistadocs([_,_,_,Listadocs], Listadocs).
+getlistadocs([_,_,_,Listadocs,_], Listadocs).
+
+getsesionactiva([_,_,_,_,SesionActiva], SesionActiva).
 
 
 
@@ -87,3 +84,55 @@ getOwner([_, _, _, _, Owner, _, _], Owner).
 getAccessList([_, _, _, _, _ , AccessList, _], AccessList).
 
 getVersionList([_, _, _, _, _, _, VersionList], VersionList).
+
+
+getallusernames(ListaUsers, UsernamesList) :- maplist(nth0(0), ListaUsers, UsernamesList).
+
+% Funcion paradigmaDocsRegister
+paradigmaDocsRegister(Sn1, Fecha, Username, Password, Sn2) :-
+            getplatformname(Sn1, N),
+            getplatformdate(Sn1, F),
+            getlistausers(Sn1, U),
+            getlistadocs(Sn1, D),
+            getsesionactiva(Sn1, S),
+            usuario(Username, Password, Fecha, NuevoUsuario),
+            getallusernames(U, UsernamesList),
+            not(member(Username, UsernamesList)),
+            append(U, [NuevoUsuario], NuevaLista),
+            Sn2 = [N, F, NuevaLista, D, S], !.
+
+% Funcion paradigmaDocsLogin
+paradigmaDocsLogin(Sn1, Username, Password, Sn2) :-
+            getplatformname(Sn1, N),
+            getplatformdate(Sn1, F),
+            getlistausers(Sn1, U),
+            getlistadocs(Sn1, D),
+            getsesionactiva(Sn1, S),
+            member([Username, Password, _], U),
+            append(S, Username, SesionLogueada),
+            Sn2 = [N, F, U, D, SesionLogueada], !.
+
+            
+paradigmaDocsCreate(Sn1, Fecha, Nombre, Contenido, Sn2) :-
+            getplatformname(Sn1, N),
+            getplatformdate(Sn1, F),
+            getlistausers(Sn1, U),
+            getlistadocs(Sn1, D),
+            getsesionactiva(Sn1, S),
+            length(D, LargoDocs),
+            nth0(0, S, UserLogueado),
+            documento(Nombre, Fecha, Contenido, LargoDocs, UserLogueado, NuevoDoc),
+            append(D, [NuevoDoc], NuevaListaDocs),
+            Sn2 = [N, F, U, NuevaListaDocs, []].
+
+
+
+/* Ejemplos
+
+
+Ejemplo de paradigmadocs y paradigmaDocsRegister
+date(20, 12, 2015, D1), date(1, 12, 2021, D2), date(3, 12, 2021, D3), paradigmadocs("google docs", D1, PD1), paradigmaDocsRegister(PD1, D2, "vflores", "hola123", PD2), paradigmaDocsRegister(PD2, D2, "crios", "qwert", PD3), paradigmaDocsRegister(PD3, D3, "alopez", "asdfg", PD4).
+
+
+
+*/
