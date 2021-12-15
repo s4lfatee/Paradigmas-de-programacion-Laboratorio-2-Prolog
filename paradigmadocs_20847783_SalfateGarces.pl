@@ -38,6 +38,8 @@ getlistadocs([_,_,_,Listadocs,_], Listadocs).
 
 getsesionactiva([_,_,_,_,SesionActiva], SesionActiva).
 
+getuserlogueado([S], S).
+
 
 
 
@@ -109,7 +111,7 @@ paradigmaDocsLogin(Sn1, Username, Password, Sn2) :-
             getlistadocs(Sn1, D),
             getsesionactiva(Sn1, S),
             member([Username, Password, _], U),
-            append(S, Username, SesionLogueada),
+            append(S, [Username], SesionLogueada),
             Sn2 = [N, F, U, D, SesionLogueada], !.
 
             
@@ -120,12 +122,12 @@ paradigmaDocsCreate(Sn1, Fecha, Nombre, Contenido, Sn2) :-
             getlistadocs(Sn1, D),
             getsesionactiva(Sn1, S),
             length(D, LargoDocs),
-            nth0(0, S, UserLogueado),
+            getuserlogueado(S, UserLogueado),
             documento(Nombre, Fecha, Contenido, LargoDocs, UserLogueado, NuevoDoc),
             append(D, [NuevoDoc], NuevaListaDocs),
             Sn2 = [N, F, U, NuevaListaDocs, []].
 
-
+            
 
 /* Ejemplos
 
@@ -133,6 +135,8 @@ paradigmaDocsCreate(Sn1, Fecha, Nombre, Contenido, Sn2) :-
 Ejemplo de paradigmadocs y paradigmaDocsRegister
 date(20, 12, 2015, D1), date(1, 12, 2021, D2), date(3, 12, 2021, D3), paradigmadocs("google docs", D1, PD1), paradigmaDocsRegister(PD1, D2, "vflores", "hola123", PD2), paradigmaDocsRegister(PD2, D2, "crios", "qwert", PD3), paradigmaDocsRegister(PD3, D3, "alopez", "asdfg", PD4).
 
+Ejemplo de paradigmaDocsCreate
+date(20, 12, 2015, D1), date(1, 12, 2021, D2), date(3, 12, 2021, D3), paradigmadocs("google docs", D1, PD1), paradigmaDocsRegister(PD1, D2, "vflores", "hola123", PD2), paradigmaDocsRegister(PD2, D2, "crios", "qwert", PD3), paradigmaDocsRegister(PD3, D3, "alopez", "asdfg", PD4), paradigmaDocsLogin(PD4, "vflores", "hola123", PD5), paradigmaDocsCreate(PD5, D2, "archivo 1", "hola mundo, este es el contenido de un archivo", PD6).
 
 
 */
