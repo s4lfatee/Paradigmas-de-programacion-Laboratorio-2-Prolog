@@ -40,8 +40,17 @@ getsesionactiva([_,_,_,_,SesionActiva], SesionActiva).
 
 getuserlogueado([S], S).
 
+% Otros predicados de paradigmadocs
+getallusernames(ListaUsers, UsernamesList) :- maplist(nth0(0), ListaUsers, UsernamesList).
 
+unirlistas(ListadePermisos, ListaUsers, ListaDeAccesos) :- maplist(append([ListadePermisos]), ListaUsers, ListaDeAccesos).
 
+verificadorusers([], _) :- !.
+verificadorusers([FirstUser|NextUsers], UsuariosRegistrados) :- ownmember(FirstUser, UsuariosRegistrados), verificadorusers(NextUsers, UsuariosRegistrados).
+
+procesarlista([], []) :- !.
+procesarlista([H|T], [[H]|T1]) :-
+                procesarlista(T, T1).
 
 % TDA Usuario
 % El TDA Usuario se representa a traves de una lista que almacena el
@@ -72,6 +81,8 @@ getUserDate([_,_, UserDate], UserDate).
 % Constructor
 documento(Titulo, FechaDoc, Contenido, Id, Owner, [Titulo, FechaDoc, Contenido, Id, Owner, [], []]).
 
+documento2(Titulo, FechaDoc, Contenido, Id, Owner, ListaAccesos, ListaVersiones, [Titulo, FechaDoc, Contenido, Id, Owner, ListaAccesos, ListaVersiones]).
+
 % Selectores
 gettitulo([Titulo, _, _, _, _, _, _], Titulo).
 
@@ -88,9 +99,44 @@ getAccessList([_, _, _, _, _ , AccessList, _], AccessList).
 getVersionList([_, _, _, _, _, _, VersionList], VersionList).
 
 
-getallusernames(ListaUsers, UsernamesList) :- maplist(nth0(0), ListaUsers, UsernamesList).
+% TDA Acceso
+% El TDA Acceso se representa a través de una lista que almacena el nombre de usuario
+% al que se le ha otorgado el permiso (string), y un tipo de acceso que alterna entre
+% R, W, C (String).
 
-% Funcion paradigmaDocsRegister
+% Constructor
+acceso(TipoAcceso, NombreUser, [TipoAcceso, NombreUser]).
+
+% Selectores
+getaccesstype([TipoAcceso, _], TipoAcceso).
+
+getaccessUser([_, NombreUser], NombreUser).
+
+
+
+
+
+
+
+
+
+
+% Implementación propia del predicado member
+ownmember(L, [L|_]):-!.
+ownmember(L, [_|R]):-
+            ownmember(L, R).
+
+% Implementación de list-set
+listset([_|T], 0, X, [X|T]).
+listset([H|T], I, X, [H|R]) :-
+            I > 0, NI is I-1, listset(T, NI, X, R).
+
+% Implementación de eq?
+equal(N1, N2) :-
+            N1 == N2.
+
+
+% Predicado paradigmaDocsRegister
 paradigmaDocsRegister(Sn1, Fecha, Username, Password, Sn2) :-
             getplatformname(Sn1, N),
             getplatformdate(Sn1, F),
@@ -99,22 +145,22 @@ paradigmaDocsRegister(Sn1, Fecha, Username, Password, Sn2) :-
             getsesionactiva(Sn1, S),
             usuario(Username, Password, Fecha, NuevoUsuario),
             getallusernames(U, UsernamesList),
-            not(member(Username, UsernamesList)),
+            not(ownmember(Username, UsernamesList)),
             append(U, [NuevoUsuario], NuevaLista),
             Sn2 = [N, F, NuevaLista, D, S], !.
 
-% Funcion paradigmaDocsLogin
+% Predicado paradigmaDocsLogin
 paradigmaDocsLogin(Sn1, Username, Password, Sn2) :-
             getplatformname(Sn1, N),
             getplatformdate(Sn1, F),
             getlistausers(Sn1, U),
             getlistadocs(Sn1, D),
             getsesionactiva(Sn1, S),
-            member([Username, Password, _], U),
+            ownmember([Username, Password, _], U),
             append(S, [Username], SesionLogueada),
             Sn2 = [N, F, U, D, SesionLogueada], !.
 
-            
+% Predicado paradigmaDocsCreate           
 paradigmaDocsCreate(Sn1, Fecha, Nombre, Contenido, Sn2) :-
             getplatformname(Sn1, N),
             getplatformdate(Sn1, F),
@@ -127,7 +173,41 @@ paradigmaDocsCreate(Sn1, Fecha, Nombre, Contenido, Sn2) :-
             append(D, [NuevoDoc], NuevaListaDocs),
             Sn2 = [N, F, U, NuevaListaDocs, []].
 
+
+% Predicado paradigmaDocsShare
+paradigmaDocsShare(Sn1, DocumentId, ListaPermisos, ListaUsernamesPermitidos, Sn2) :-
+            getplatformname(Sn1, N),
+            getplatformdate(Sn1, F),
+            getlistausers(Sn1, U),
+            getlistadocs(Sn1, D),
+            getsesionactiva(Sn1, S),
+            getuserlogueado(S, UserLogged),
+            getallusernames(U, ListadeUsernames),
+            nth0(DocumentId, D, DocumentoMod),
+            gettitulo(DocumentoMod, TituloDoc),
+            getfechaDoc(DocumentoMod, FechaDocs),
+            getContenido(DocumentoMod, ContentDoc),
+            getIdDoc(DocumentoMod, IdDocumento),
+            getOwner(DocumentoMod, Ownerdoc),
+            getAccessList(DocumentoMod, ListadeAccesosDoc),
+            getVersionList(DocumentoMod, ListaVerDoc),
+            equal(UserLogged, Ownerdoc),
+            not(ownmember(Ownerdoc, ListaUsernamesPermitidos)),
+            verificadorusers(ListaUsernamesPermitidos, ListadeUsernames),
+            procesarlista(ListaUsernamesPermitidos, ListaProcesada),
+            unirlistas(ListaPermisos, ListaProcesada, ListaDeAccesos),
+            append(ListaDeAccesos, ListadeAccesosDoc, NuevaListaAccess),
+            documento2(TituloDoc, FechaDocs, ContentDoc, IdDocumento, Ownerdoc, NuevaListaAccess, ListaVerDoc, NuevoDocAccess),
+            listset(D, DocumentId, NuevoDocAccess, NuevalistaDocs),
+            Sn2 = [N, F, U, NuevalistaDocs, []].
+
+
+
+
+
+
             
+
 
 /* Ejemplos
 
@@ -136,7 +216,7 @@ Ejemplo de paradigmadocs y paradigmaDocsRegister
 date(20, 12, 2015, D1), date(1, 12, 2021, D2), date(3, 12, 2021, D3), paradigmadocs("google docs", D1, PD1), paradigmaDocsRegister(PD1, D2, "vflores", "hola123", PD2), paradigmaDocsRegister(PD2, D2, "crios", "qwert", PD3), paradigmaDocsRegister(PD3, D3, "alopez", "asdfg", PD4).
 
 Ejemplo de paradigmaDocsCreate
-date(20, 12, 2015, D1), date(1, 12, 2021, D2), date(3, 12, 2021, D3), paradigmadocs("google docs", D1, PD1), paradigmaDocsRegister(PD1, D2, "vflores", "hola123", PD2), paradigmaDocsRegister(PD2, D2, "crios", "qwert", PD3), paradigmaDocsRegister(PD3, D3, "alopez", "asdfg", PD4), paradigmaDocsLogin(PD4, "vflores", "hola123", PD5), paradigmaDocsCreate(PD5, D2, "archivo 1", "hola mundo, este es el contenido de un archivo", PD6).
+date(20, 12, 2015, D1), date(1, 12, 2021, D2), date(3, 12, 2021, D3), paradigmadocs("google docs", D1, PD1), paradigmaDocsRegister(PD1, D2, "vflores", "hola123", PD2), paradigmaDocsRegister(PD2, D2, "crios", "qwert", PD3), paradigmaDocsRegister(PD3, D3, "alopez", "asdfg", PD4), paradigmaDocsLogin(PD4, "vflores", "hola123", PD5), paradigmaDocsCreate(PD5, D2, "archivo 1", "hola mundo, este es el contenido de un archivo", PD6), paradigmaDocsLogin(PD6, "crios", "qwert", PD7), paradigmaDocsCreate(PD7, D2, "archivo2", "alex linda", PD8), paradigmaDocsLogin(PD8, "vflores", "hola123", PD9), paradigmaDocsShare(PD9, 0, ["R"], ["crios", "alopez"], PD10), paradigmaDocsLogin(PD10, "crios", "qwert", PD11), paradigmaDocsShare(PD11, 1, ["R", "C"], ["alopez"], PD12).
 
 
 */
