@@ -88,6 +88,8 @@ Dominios:
                 ListaWithUser: List
                 Username: String
                 ListaUserEncontrado: List
+                EstadoSesion: List
+                LargoSesion: Entero
 
 
 Predicados:
@@ -108,6 +110,7 @@ Predicados:
                 allversionstostring(ListVersions, ListStrVersion).                                      Aridad = 2
                 alldocumentstostring(Listadocs, ListStrDocs).                                           Aridad = 2
                 userloggedexists(SesionActiva).                                                         Aridad = 1
+                largoestadosesion(EstadoSesion, LargoSesion).                                           Aridad = 2
 
 Metas primarias:
                 getplatformname
@@ -136,6 +139,7 @@ Metas primarias:
                 userloggedexists
                 obtenerusuario
                 getusuarioencontrado
+                largoestadosesion
 
 Metas secundarias:
                 listset
@@ -194,6 +198,9 @@ userautenticado(EstadoSesion, Username, SesionLogueada) :-
 % Dominio: List X usuario X List
 agregaruser(ListaUsers, NuevoUser, NuevaListaUsers) :-
             append(ListaUsers, [NuevoUser], NuevaListaUsers).
+
+largoestadosesion(EstadoSesion, LargoSesion) :-
+            length(EstadoSesion, LargoSesion).
 
 % Descripción: Predicado que consigue el largo de la lista de documentos de la plataforma paradigmaDocs
 % Dominio: List X Entero
@@ -822,6 +829,8 @@ paradigmaDocsLogin(Sn1, Username, Password, Sn2) :-
             getsesionactiva(Sn1, S),
             autenticarusuario([Username, Password, _], U),
             userautenticado(S, Username, SesionLogueada),
+            largoestadosesion(SesionLogueada, LargoSesion),
+            LargoSesion =< 1,
             Sn2 = [N, F, U, D, SesionLogueada], !.
 
 % Descripción: Predicado que crea nuevos documentos en la plataforma paradigmaDocs
@@ -994,8 +1003,31 @@ ejemploRegister2(PD5) :-
             paradigmaDocsRegister(PD3, D3, "alopez", "asdfg", PD4),
             paradigmaDocsRegister(PD4, D4, "alopez", "salfate", PD5).
 %---------------------------------------------------------------------------
+% Ejemplos paradigmaDocsLogin
 
-% --- Ejemplos de paradigmaDocsCreate ---
+% Se loguea el usuario "vflores" a la plataforma
+ejemploLogin1(PD1) :-
+            ejemploRegister1(X),
+            paradigmaDocsLogin(X, "vflores", "hola123", PD1).
+
+% La contraseña no coincide con el usuario vflores, retorna false
+ejemploLogin2(PD1) :-
+            ejemploRegister1(X),
+            paradigmaDocsLogin(X, "vflores", "hola12345", PD1).
+
+% El usuario no existe, retorna false
+ejemploLogin3(PD1) :-
+            ejemploRegister1(X),
+            paradigmaDocsLogin(X, "vfloresdsdsds", "hola123", PD1).
+
+% Se loguean dos usuarios seguidos, retorna false
+ejemploLogin4(PD2) :-
+            ejemploRegister1(X),
+            paradigmaDocsLogin(X, "vflores", "hola123", PD1),
+            paradigmaDocsLogin(PD1, "fco", "salfate", PD2).
+
+%---------------------------------------------------------------------------
+% Ejemplos de paradigmaDocsCreate
 % Se crean 5 documentos, dos documentos pertenecen a "vflores", y el resto de los documentos son uno por cada usuario registrado
 ejemploCreate1(PD15) :-
             date(10, 12, 2015, D1), 
