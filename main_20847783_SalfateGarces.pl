@@ -30,6 +30,9 @@ Metas secundarias:
                 number
 */
 
+% Clausulas:
+% Reglas:
+
 % Descripción: Constructor del TDA Fecha
 % Dominio: Entero X Entero X Entero X Fecha
 date(Dia,Mes,Year, [Dia,Mes,Year]):-
@@ -150,6 +153,9 @@ Metas secundarias:
                 append
                 
 */
+
+% Clausulas:
+% Reglas:
 
 % Descripción: Predicado Constructor del TDA paradigmaDocs
 % Dominio: String X Date X paradigmaDocs
@@ -314,6 +320,9 @@ Metas secundarias:
                 atomics_to_string
 */
 
+% Clausulas:
+% Reglas:
+
 % Descripción: Predicado constructor del TDA usuario
 % Dominio: String X String X date X usuario
 usuario(Username, Password, UserDate, [Username, Password, UserDate]).
@@ -432,6 +441,9 @@ Metas secundarias:
                 allversionstostring
                 allaccessestostring
 */
+
+% Clausulas:
+% Reglas:
 
 % Descripción: Predicado constructor del TDA documento
 % Dominio: String X date X String X Entero X String X documento
@@ -578,6 +590,9 @@ Metas secundarias:
 
 */
 
+% Clausulas:
+% Reglas:
+
 % Descripción: Predicado constructor del TDA acceso
 % Dominio: String X List X acceso
 acceso(NombreUser, TipoAcceso, [NombreUser, TipoAcceso]).
@@ -659,6 +674,9 @@ Metas secundarias:
 
 */
 
+% Clausulas:
+% Reglas:
+
 % Descripción: Predicado constructor del TDA version
 % Dominio: date X String X Entero X version
 version(Fecha, Contenido, Id, [Fecha, Contenido, Id]).
@@ -691,6 +709,9 @@ versiontostring(Version, StrOut) :-
 Predicados que no corresponden a TDAs
 *******************************************
 */
+
+% Clausulas:
+% Reglas:
 
 % Descripción: Implementación propia del predicado nth0
 % Dominio: Entero X Lista X Cualquiera
@@ -804,6 +825,9 @@ Metas secundarias:
                 getusuarioencontrado
                 
 */
+
+% Clausulas:
+% Reglas:
 
 % Descripción: Predicado que registra a un nuevo usuario a la plataforma paradigmaDocs, verificando también si es que se trata de un usuario repetido
 % Dominio: paradigmaDocs X date X String X String X paradigmaDocs
