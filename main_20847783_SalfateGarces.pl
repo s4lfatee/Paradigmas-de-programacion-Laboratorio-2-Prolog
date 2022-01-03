@@ -793,6 +793,8 @@ Metas secundarias:
                 alluserstostring
                 crearstring_users
                 crearstring_paradigmadocs
+                obtenerusuario
+                getusuarioencontrado
                 
 */
 
