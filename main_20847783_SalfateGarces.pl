@@ -1015,8 +1015,21 @@ ejemploRegister1(PD5) :-
             paradigmaDocsRegister(PD2, D2, "crios", "qwert", PD3), 
             paradigmaDocsRegister(PD3, D3, "alopez", "asdfg", PD4),
             paradigmaDocsRegister(PD4, D4, "fco", "salfate", PD5).
-% Se registran cuatro usuarios, pero se intenta registrar un usuario con un nombre ya utilizado, por lo tanto se retorna false
+
+% Se intenta registrar a varios usuarios y uno con una fecha invalida, por ende se retorna false
 ejemploRegister2(PD5) :-
+            date(10, 12, 2015, D1), 
+            date(11, 12, 2021, D2), 
+            date(13, 12, 2021, D3),
+            date(13, 13, 2021, D4),
+            paradigmaDocs("google docs", D1, PD1), 
+            paradigmaDocsRegister(PD1, D2, "vflores", "hola123", PD2), 
+            paradigmaDocsRegister(PD2, D2, "crios", "qwert", PD3), 
+            paradigmaDocsRegister(PD3, D3, "alopez", "asdfg", PD4),
+            paradigmaDocsRegister(PD4, D4, "fco", "salfate", PD5).
+
+% Se registran cuatro usuarios, pero se intenta registrar un usuario con un nombre ya utilizado, por lo tanto se retorna false
+ejemploRegister3(PD5) :-
             date(10, 12, 2015, D1), 
             date(11, 12, 2021, D2), 
             date(13, 12, 2021, D3),
@@ -1076,8 +1089,23 @@ ejemploCreate1(PD15) :-
             paradigmaDocsCreate(PD12, D6, "doc4", "contenido doc4", PD13),
             paradigmaDocsLogin(PD13, "fco", "salfate", PD14),
             paradigmaDocsCreate(PD14, D7, "doc5", "contenido doc5", PD15).
+
+% Se intenta crear documentos sin realizar un login previamente, retorna false
+ejemploCreate2(PD6) :-
+            date(10, 12, 2015, D1), 
+            date(11, 12, 2021, D2), 
+            date(13, 12, 2021, D3),
+            date(13, 12, 2021, D4),
+            date(15, 12, 2021, D5),
+            paradigmaDocs("google docs", D1, PD1), 
+            paradigmaDocsRegister(PD1, D2, "vflores", "hola123", PD2), 
+            paradigmaDocsRegister(PD2, D2, "crios", "qwert", PD3), 
+            paradigmaDocsRegister(PD3, D3, "alopez", "asdfg", PD4),
+            paradigmaDocsRegister(PD4, D4, "fco", "salfate", PD5),
+            paradigmaDocsCreate(PD5, D5, "doc1", "contenido doc1", PD6).
+
 % Se intenta crear un documento pero falla la autenticación de login, por lo tanto se retorna false
-ejemploCreate2(PD7) :-
+ejemploCreate3(PD7) :-
             date(10, 12, 2015, D1), 
             date(11, 12, 2021, D2), 
             date(13, 12, 2021, D3),
@@ -1400,6 +1428,48 @@ ejemploRestoreVersion2(PD31) :-
             paradigmaDocsAdd(PD28, 4, D9, " malditos ejemplos!!", PD29),
             paradigmaDocsLogin(PD29, "vflores", "hola123", PD30),
             paradigmaDocsRestoreVersion(PD30, 4, 1, PD31).
+
+% Se intenta restaurar una versión sin un login previo, se retorna false
+ejemploRestoreVersion3(PD30) :-
+            date(10, 12, 2015, D1), 
+            date(11, 12, 2021, D2), 
+            date(13, 12, 2021, D3),
+            date(13, 12, 2021, D4),
+            date(15, 12, 2021, D5),
+            date(20, 12, 2021, D6),
+            date(21, 12, 2021, D7),
+            date(22, 12, 2021, D8),
+            date(23, 12, 2021, D9),
+            paradigmaDocs("google docs", D1, PD1), 
+            paradigmaDocsRegister(PD1, D2, "vflores", "hola123", PD2), 
+            paradigmaDocsRegister(PD2, D2, "crios", "qwert", PD3), 
+            paradigmaDocsRegister(PD3, D3, "alopez", "asdfg", PD4),
+            paradigmaDocsRegister(PD4, D4, "fco", "salfate", PD5),
+            paradigmaDocsLogin(PD5, "vflores", "hola123", PD6),
+            paradigmaDocsCreate(PD6, D5, "doc1", "contenido doc1", PD7),
+            paradigmaDocsLogin(PD7, "vflores", "hola123", PD8),
+            paradigmaDocsCreate(PD8, D5, "doc2", "contenido doc2", PD9),
+            paradigmaDocsLogin(PD9, "crios", "qwert", PD10),
+            paradigmaDocsCreate(PD10, D6, "doc3", "contenido doc3", PD11),
+            paradigmaDocsLogin(PD11, "alopez", "asdfg", PD12),
+            paradigmaDocsCreate(PD12, D6, "doc4", "contenido doc4", PD13),
+            paradigmaDocsLogin(PD13, "fco", "salfate", PD14),
+            paradigmaDocsCreate(PD14, D7, "doc5", "contenido doc5", PD15),
+            paradigmaDocsLogin(PD15, "vflores", "hola123", PD16),
+            paradigmaDocsShare(PD16, 0, ["R"], ["crios"], PD17),
+            paradigmaDocsLogin(PD17, "crios", "qwert", PD18),
+            paradigmaDocsShare(PD18, 2, ["R", "C", "S"], ["fco", "alopez"], PD19),
+            paradigmaDocsLogin(PD19, "fco", "salfate", PD20),
+            paradigmaDocsShare(PD20, 2, ["R"], ["vflores"], PD21),
+            paradigmaDocsLogin(PD21, "fco", "salfate", PD22),
+            paradigmaDocsShare(PD22, 4, ["W", "R"], ["vflores", "crios"], PD23),
+            paradigmaDocsLogin(PD23, "vflores", "hola123", PD24),
+            paradigmaDocsAdd(PD24, 4, D8, " un poco mas de contenido", PD25),
+            paradigmaDocsLogin(PD25, "vflores", "hola123", PD26),
+            paradigmaDocsAdd(PD26, 0, D8, " me gusta prolog pero hacer ejemplos cansa un poquito", PD27),
+            paradigmaDocsLogin(PD27, "crios", "qwert", PD28),
+            paradigmaDocsAdd(PD28, 4, D9, " malditos ejemplos!!", PD29),
+            paradigmaDocsRestoreVersion(PD29, 4, 1, PD30).
 
 
 %---------------------------------------------------------------------------
